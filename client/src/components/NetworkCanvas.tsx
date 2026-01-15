@@ -109,37 +109,47 @@ export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange, selecte
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
+    // Dynamic font size - bigger when zoomed out, smaller when zoomed in
+    const baseFontSize = 14;
+    const fontSize = Math.min(24, Math.max(8, baseFontSize / globalScale));
+    const labelOffset = 85 / globalScale;
+    const padding = 6 / globalScale;
+    const rectHeight = 18 / globalScale;
+    
     Object.values(clusterCenters).forEach(center => {
-      // Draw Grid Marker - Subtle Circle
+      // Draw Grid Marker - Subtle Circle (also scale with zoom)
+      const markerSize = 80 / globalScale;
+      const crosshairSize = 10 / globalScale;
+      
       ctx.strokeStyle = 'rgba(255, 255, 255, 0.08)';
-      ctx.lineWidth = 1;
+      ctx.lineWidth = 1 / globalScale;
       
       ctx.beginPath();
-      ctx.arc(center.x, center.y, 80, 0, 2 * Math.PI);
+      ctx.arc(center.x, center.y, markerSize, 0, 2 * Math.PI);
       ctx.stroke();
 
       // Crosshair center
       ctx.beginPath();
-      ctx.moveTo(center.x - 10, center.y);
-      ctx.lineTo(center.x + 10, center.y);
-      ctx.moveTo(center.x, center.y - 10);
-      ctx.lineTo(center.x, center.y + 10);
+      ctx.moveTo(center.x - crosshairSize, center.y);
+      ctx.lineTo(center.x + crosshairSize, center.y);
+      ctx.moveTo(center.x, center.y - crosshairSize);
+      ctx.lineTo(center.x, center.y + crosshairSize);
       ctx.stroke();
 
       // Label background for visibility
-      ctx.font = 'bold 12px "Share Tech Mono"';
+      ctx.font = `bold ${fontSize}px "Share Tech Mono"`;
       const textWidth = ctx.measureText(center.label).width;
       ctx.fillStyle = 'rgba(22, 24, 29, 0.85)';
-      ctx.fillRect(center.x - textWidth/2 - 6, center.y + 85, textWidth + 12, 18);
+      ctx.fillRect(center.x - textWidth/2 - padding, center.y + labelOffset, textWidth + padding * 2, rectHeight);
       
       // Label border
       ctx.strokeStyle = 'rgba(130, 207, 255, 0.3)';
-      ctx.lineWidth = 1;
-      ctx.strokeRect(center.x - textWidth/2 - 6, center.y + 85, textWidth + 12, 18);
+      ctx.lineWidth = 1 / globalScale;
+      ctx.strokeRect(center.x - textWidth/2 - padding, center.y + labelOffset, textWidth + padding * 2, rectHeight);
 
       // Label text
       ctx.fillStyle = '#82cfff';
-      ctx.fillText(center.label, center.x, center.y + 94);
+      ctx.fillText(center.label, center.x, center.y + labelOffset + rectHeight / 2);
     });
     
     ctx.restore();
