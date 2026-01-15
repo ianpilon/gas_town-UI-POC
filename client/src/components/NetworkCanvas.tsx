@@ -9,9 +9,10 @@ interface NetworkCanvasProps {
   data: any;
   onNodeClick: (node: any) => void;
   filter: 'all' | 'exceptional';
+  onZoomChange?: (zoom: number) => void;
 }
 
-export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps) {
+export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange }: NetworkCanvasProps) {
   const graphRef = useRef<any>(null);
   const [dimensions, setDimensions] = useState({ w: window.innerWidth, h: window.innerHeight });
 
@@ -180,6 +181,9 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
         warmupTicks={100}
         onEngineStop={() => {
            // Engine stopped
+        }}
+        onZoom={(transform: { k: number }) => {
+          onZoomChange?.(transform.k);
         }}
       />
     </div>

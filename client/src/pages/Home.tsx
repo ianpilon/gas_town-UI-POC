@@ -13,6 +13,7 @@ const graphData = generateGraphData(1000);
 export default function Home() {
   const [selectedNode, setSelectedNode] = useState<NodeData | null>(null);
   const [filter, setFilter] = useState<'all' | 'exceptional'>('all');
+  const [zoomLevel, setZoomLevel] = useState<number>(1);
 
   // Stats
   const totalNodes = graphData.nodes.length;
@@ -26,6 +27,7 @@ export default function Home() {
         data={graphData} 
         onNodeClick={setSelectedNode} 
         filter={filter}
+        onZoomChange={setZoomLevel}
       />
 
       {/* Header / Nav Overlay */}
@@ -55,6 +57,11 @@ export default function Home() {
              <div className="text-center px-2">
                 <span className="block text-xl font-mono text-secondary">{exceptionalCount}</span>
                 <span className="hud-text text-secondary/70">HVT</span>
+             </div>
+             <div className="w-px h-8 bg-white/5" />
+             <div className="text-center px-2">
+                <span className="block text-xl font-mono text-primary">{zoomLevel.toFixed(1)}x</span>
+                <span className="hud-text text-primary/70">Zoom</span>
              </div>
           </div>
         </div>
