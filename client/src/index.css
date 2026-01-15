@@ -31,34 +31,39 @@
 }
 
 :root {
-  /* Tactical Recon Theme */
-  --background: 0 0% 5%; /* #0d0d0d */
-  --foreground: 0 0% 90%; /* #e6e6e6 */
+  /* Stealth Tactical Theme - Shades of Grey & Pastels */
+  
+  /* Deep Gunmetal / Charcoal Backgrounds */
+  --background: 220 13% 10%; /* #16181d */
+  --foreground: 218 11% 65%; /* #949bb1 - Muted Text */
 
-  --card: 0 0% 7%;
-  --card-foreground: 0 0% 90%;
+  --card: 220 13% 13%; /* Slightly lighter than bg */
+  --card-foreground: 218 11% 80%;
 
-  --popover: 0 0% 7%;
-  --popover-foreground: 0 0% 90%;
+  --popover: 220 13% 13%;
+  --popover-foreground: 218 11% 80%;
 
-  --primary: 24 100% 50%; /* Tactical Orange #ff6600 */
-  --primary-foreground: 0 0% 100%;
+  /* Soft Pastel Blue for Primary Ops */
+  --primary: 200 95% 75%; /* #82cfff */
+  --primary-foreground: 220 13% 10%;
 
-  --secondary: 210 20% 20%; /* Muted slate */
-  --secondary-foreground: 0 0% 90%;
+  /* Soft Pastel Coral for Alerts/High Value */
+  --secondary: 350 85% 75%; /* #fca5a5 */
+  --secondary-foreground: 220 13% 10%;
 
-  --muted: 0 0% 15%;
-  --muted-foreground: 0 0% 50%;
+  /* Muted Slate */
+  --muted: 215 15% 25%;
+  --muted-foreground: 218 10% 50%;
 
-  --accent: 24 100% 50%;
-  --accent-foreground: 0 0% 100%;
+  --accent: 200 95% 75%;
+  --accent-foreground: 220 13% 10%;
 
-  --destructive: 0 62% 30%;
-  --destructive-foreground: 0 0% 90%;
+  --destructive: 350 60% 50%;
+  --destructive-foreground: 0 0% 98%;
 
-  --border: 0 0% 20%;
-  --input: 0 0% 15%;
-  --ring: 24 100% 50%;
+  --border: 215 15% 20%;
+  --input: 215 15% 18%;
+  --ring: 200 95% 75%;
 
   --radius: 0px;
 }
@@ -69,86 +74,70 @@
   }
   body {
     @apply font-sans antialiased bg-background text-foreground;
-    /* Diagonal Grid Texture */
-    background-image: repeating-linear-gradient(
-      45deg,
-      rgba(255, 255, 255, 0.02) 0px,
-      rgba(255, 255, 255, 0.02) 1px,
-      transparent 1px,
-      transparent 10px
-    );
+    /* Subtle Topographic/Grid Texture */
+    background-image: 
+      radial-gradient(circle at 50% 50%, rgba(130, 207, 255, 0.02) 0%, transparent 60%),
+      linear-gradient(rgba(255, 255, 255, 0.01) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(255, 255, 255, 0.01) 1px, transparent 1px);
+    background-size: 100% 100%, 40px 40px, 40px 40px;
   }
 }
 
-/* Tactical HUD Elements */
+/* Tactical HUD Elements - Refined */
 .hud-panel {
-  @apply bg-background/90 border border-white/10 backdrop-blur-sm relative;
+  @apply bg-[#1a1c23]/90 border border-white/5 backdrop-blur-md relative shadow-lg;
 }
 
+/* Corners are now simpler/cleaner */
 .hud-corner-tl::before {
   content: '';
   position: absolute;
-  top: -1px;
-  left: -1px;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid hsl(var(--primary));
-  border-left: 2px solid hsl(var(--primary));
+  top: 0px;
+  left: 0px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid hsl(var(--primary) / 0.5);
+  border-left: 1px solid hsl(var(--primary) / 0.5);
 }
 
 .hud-corner-tr::after {
   content: '';
   position: absolute;
-  top: -1px;
-  right: -1px;
-  width: 12px;
-  height: 12px;
-  border-top: 2px solid hsl(var(--primary));
-  border-right: 2px solid hsl(var(--primary));
+  top: 0px;
+  right: 0px;
+  width: 8px;
+  height: 8px;
+  border-top: 1px solid hsl(var(--primary) / 0.5);
+  border-right: 1px solid hsl(var(--primary) / 0.5);
 }
 
 .hud-corner-bl::before {
   content: '';
   position: absolute;
-  bottom: -1px;
-  left: -1px;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid hsl(var(--primary));
-  border-left: 2px solid hsl(var(--primary));
+  bottom: 0px;
+  left: 0px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 1px solid hsl(var(--primary) / 0.5);
+  border-left: 1px solid hsl(var(--primary) / 0.5);
 }
 
 .hud-corner-br::after {
   content: '';
   position: absolute;
-  bottom: -1px;
-  right: -1px;
-  width: 12px;
-  height: 12px;
-  border-bottom: 2px solid hsl(var(--primary));
-  border-right: 2px solid hsl(var(--primary));
+  bottom: 0px;
+  right: 0px;
+  width: 8px;
+  height: 8px;
+  border-bottom: 1px solid hsl(var(--primary) / 0.5);
+  border-right: 1px solid hsl(var(--primary) / 0.5);
 }
 
 .hud-text {
-  @apply font-mono uppercase tracking-widest text-xs;
+  @apply font-mono uppercase tracking-widest text-[10px] text-muted-foreground;
 }
 
-.scan-line {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100%;
-  height: 4px;
-  background: hsl(var(--primary) / 0.1);
-  box-shadow: 0 0 10px hsl(var(--primary) / 0.5);
-  animation: scan 4s linear infinite;
-  pointer-events: none;
-  z-index: 50;
-}
-
-@keyframes scan {
-  0% { top: -10%; opacity: 0; }
-  10% { opacity: 1; }
-  90% { opacity: 1; }
-  100% { top: 110%; opacity: 0; }
+/* Subtle pulse instead of aggressive scan line */
+.status-indicator {
+  @apply w-2 h-2 rounded-full bg-primary shadow-[0_0_10px_hsl(var(--primary))] animate-pulse;
 }

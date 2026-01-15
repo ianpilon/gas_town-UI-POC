@@ -67,29 +67,30 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
 
   const drawClusterLabels = useCallback((ctx: CanvasRenderingContext2D, globalScale: number) => {
     ctx.save();
-    ctx.font = '400 12px "Share Tech Mono"'; // Technical mono font
+    ctx.font = '500 10px "Share Tech Mono"'; // Technical mono font, smaller
     ctx.textAlign = 'center';
     ctx.textBaseline = 'middle';
     
     Object.values(clusterCenters).forEach(center => {
-      // Draw Grid Marker
-      ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+      // Draw Grid Marker - Subtle Circle
+      ctx.strokeStyle = 'rgba(255, 255, 255, 0.05)';
       ctx.lineWidth = 1;
+      
       ctx.beginPath();
-      ctx.moveTo(center.x - 50, center.y);
-      ctx.lineTo(center.x + 50, center.y);
-      ctx.moveTo(center.x, center.y - 50);
-      ctx.lineTo(center.x, center.y + 50);
+      ctx.arc(center.x, center.y, 80, 0, 2 * Math.PI);
       ctx.stroke();
 
-      // Draw Label Background
-      ctx.fillStyle = 'rgba(0, 0, 0, 0.8)';
-      const textWidth = ctx.measureText(center.label).width;
-      ctx.fillRect(center.x - textWidth/2 - 4, center.y - 8, textWidth + 8, 16);
-      
-      // Draw Label Text
-      ctx.fillStyle = '#ff6600'; // Primary tactical orange
-      ctx.fillText(center.label, center.x, center.y + 1);
+      // Crosshair center
+      ctx.beginPath();
+      ctx.moveTo(center.x - 10, center.y);
+      ctx.lineTo(center.x + 10, center.y);
+      ctx.moveTo(center.x, center.y - 10);
+      ctx.lineTo(center.x, center.y + 10);
+      ctx.stroke();
+
+      // Label
+      ctx.fillStyle = '#64748b'; // Slate-500
+      ctx.fillText(center.label, center.x, center.y + 95);
     });
     
     ctx.restore();
@@ -99,24 +100,21 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
     const isExceptional = node.exceptional;
     const isFilteredOut = filter === 'exceptional' && !isExceptional;
     
-    const opacity = isFilteredOut ? 0.05 : 1;
+    const opacity = isFilteredOut ? 0.02 : 1; // Even more faded when filtered
     
     // Draw connections/crosshairs for exceptional
     if (isExceptional && !isFilteredOut) {
       const size = 6;
       ctx.beginPath();
-      ctx.arc(node.x, node.y, size + 4, 0, 2 * Math.PI, false);
-      ctx.strokeStyle = 'rgba(255, 102, 0, 0.3)';
-      ctx.lineWidth = 1;
-      ctx.stroke();
+      ctx.arc(node.x, node.y, size + 5, 0, 2 * Math.PI, false);
+      ctx.fillStyle = 'rgba(252, 165, 165, 0.1)'; // Soft Red glow (pastel)
+      ctx.fill();
       
-      // Target brackets
-      ctx.strokeStyle = '#ff6600';
+      // Target ring
+      ctx.strokeStyle = '#fca5a5'; // Pastel Red
+      ctx.lineWidth = 0.5;
       ctx.beginPath();
-      ctx.moveTo(node.x - 8, node.y - 8);
-      ctx.lineTo(node.x - 4, node.y - 8);
-      ctx.moveTo(node.x - 8, node.y - 8);
-      ctx.lineTo(node.x - 8, node.y - 4);
+      ctx.arc(node.x, node.y, size + 3, 0, 2 * Math.PI, false);
       ctx.stroke();
     }
 
@@ -124,7 +122,15 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
     const size = isExceptional ? 4 : 2;
     ctx.beginPath();
     ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
-    ctx.fillStyle = isExceptional ? '#ff6600' : '#475569'; // Orange or Slate-600
+    
+    // COLORS: Pastel Blue (Primary) vs Pastel Red (Exceptional) vs Dark Slate (Regular)
+    if (isExceptional) {
+       ctx.fillStyle = '#fca5a5'; // Pastel Red
+    } else {
+       // Vary the grey slightly for texture
+       ctx.fillStyle = '#475569'; // Slate-600
+    }
+    
     ctx.globalAlpha = opacity;
     ctx.fill();
 
@@ -136,8 +142,8 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
        ctx.font = '400 4px "Share Tech Mono"';
        ctx.textAlign = 'left';
        ctx.textBaseline = 'middle';
-       ctx.fillStyle = isExceptional ? '#ff6600' : 'rgba(255,255,255,0.5)';
-       ctx.fillText(`// ${node.name}`, node.x + 8, node.y);
+       ctx.fillStyle = isExceptional ? '#fca5a5' : 'rgba(255,255,255,0.4)';
+       ctx.fillText(`${node.name}`, node.x + 8, node.y);
     }
   }, [filter]);
 
@@ -149,9 +155,9 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
         height={dimensions.h}
         graphData={data}
         nodeLabel="name"
-        backgroundColor="#00000000" // Transparent to show CSS grid background
+        backgroundColor="#00000000" // Transparent
         nodeRelSize={4}
-        linkColor={() => '#334155'} // slate-700
+        linkColor={() => '#1e293b'} // slate-800 (Very subtle links)
         linkWidth={1}
         onNodeClick={(node: any) => {
             // Zoom to node

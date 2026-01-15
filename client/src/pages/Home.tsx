@@ -19,8 +19,7 @@ export default function Home() {
   const exceptionalCount = graphData.nodes.filter(n => n.exceptional).length;
 
   return (
-    <div className="relative w-full h-screen bg-background overflow-hidden font-sans">
-      <div className="scan-line" />
+    <div className="relative w-full h-screen bg-background overflow-hidden font-sans selection:bg-primary/20">
       
       {/* Background Graph */}
       <NetworkCanvas 
@@ -32,67 +31,72 @@ export default function Home() {
       {/* Header / Nav Overlay */}
       <div className="absolute top-0 left-0 right-0 p-6 pointer-events-none flex justify-between items-start z-10 h-32">
         <div className="pointer-events-auto flex items-start gap-6">
-          <div className="hud-panel p-4 w-64 hud-corner-tl">
+          <div className="hud-panel p-4 w-72 hud-corner-tl">
              <div className="flex items-center gap-3 mb-2">
-                <ShieldAlert className="text-primary w-5 h-5 animate-pulse" />
-                <span className="hud-text text-primary">SentriX // Recon</span>
+                <div className="status-indicator" />
+                <span className="hud-text text-primary font-bold">SENTRIX // RECON</span>
              </div>
-             <div className="h-px bg-white/10 w-full mb-2" />
-             <h1 className="text-xl font-bold uppercase tracking-wider text-white">Talent Grid</h1>
-             <p className="hud-text text-muted-foreground mt-1">Status: <span className="text-green-500">Active Monitoring</span></p>
+             <div className="h-px bg-white/5 w-full mb-3" />
+             <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground">Talent Grid <span className="text-white/20">V.04</span></h1>
+             <p className="hud-text mt-1">
+                Sector: <span className="text-secondary">Global</span> // Status: <span className="text-primary">Online</span>
+             </p>
           </div>
           
-          <div className="hud-panel p-2 flex gap-4 items-center">
-             <div className="text-center px-4 border-r border-white/10">
-                <span className="block text-2xl font-mono font-bold text-white">{totalNodes}</span>
-                <span className="hud-text text-muted-foreground">Total Units</span>
+          <div className="hud-panel p-3 flex gap-6 items-center">
+             <div className="text-center px-2">
+                <span className="block text-xl font-mono text-foreground">{totalNodes}</span>
+                <span className="hud-text">Units</span>
              </div>
-             <div className="text-center px-4">
-                <span className="block text-2xl font-mono font-bold text-primary">{exceptionalCount}</span>
-                <span className="hud-text text-primary">High Value Targets</span>
+             <div className="w-px h-8 bg-white/5" />
+             <div className="text-center px-2">
+                <span className="block text-xl font-mono text-secondary">{exceptionalCount}</span>
+                <span className="hud-text text-secondary/70">HVT</span>
              </div>
           </div>
         </div>
 
-        <div className="pointer-events-auto flex gap-2">
-          <Button variant="outline" className="hud-panel border-white/20 text-xs font-mono uppercase hover:bg-white/5 hover:text-primary rounded-none h-10">
-            <Terminal className="w-3 h-3 mr-2" /> System Logs
+        <div className="pointer-events-auto flex gap-3">
+          <Button variant="outline" className="hud-panel border-white/5 text-xs font-mono uppercase hover:bg-white/5 text-muted-foreground hover:text-foreground rounded-none h-10 px-4">
+            <Terminal className="w-3 h-3 mr-2" /> Logs
           </Button>
-          <Button className="bg-primary hover:bg-primary/90 text-black font-bold font-mono uppercase rounded-none h-10">
-             <Activity className="w-3 h-3 mr-2" /> Initialize Link
+          <Button className="bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/50 font-mono uppercase rounded-none h-10 px-6 backdrop-blur-sm transition-all">
+             <Activity className="w-3 h-3 mr-2" /> Connect
           </Button>
         </div>
       </div>
 
-      {/* Crosshairs & Grid Overlays */}
-      <div className="absolute inset-0 pointer-events-none opacity-20">
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[800px] h-[800px] border border-white/10 rounded-full" />
-         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[600px] h-[600px] border border-dashed border-white/10 rounded-full" />
-         <div className="absolute top-8 left-8 w-8 h-8 border-t border-l border-primary" />
-         <div className="absolute top-8 right-8 w-8 h-8 border-t border-r border-primary" />
-         <div className="absolute bottom-8 left-8 w-8 h-8 border-b border-l border-primary" />
-         <div className="absolute bottom-8 right-8 w-8 h-8 border-b border-r border-primary" />
+      {/* Subtle Map Overlays - Refined */}
+      <div className="absolute inset-0 pointer-events-none">
+         {/* Large Circle */}
+         <div className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2 w-[900px] h-[900px] border border-white/5 rounded-full" />
+         
+         {/* Corner Markers */}
+         <div className="absolute top-12 left-12 w-4 h-4 border-t border-l border-white/10" />
+         <div className="absolute top-12 right-12 w-4 h-4 border-t border-r border-white/10" />
+         <div className="absolute bottom-12 left-12 w-4 h-4 border-b border-l border-white/10" />
+         <div className="absolute bottom-12 right-12 w-4 h-4 border-b border-r border-white/10" />
       </div>
 
       {/* Bottom Controls */}
       <div className="absolute bottom-8 left-8 z-10 pointer-events-auto w-80">
         <div className="hud-panel p-1 hud-corner-bl flex flex-col gap-1">
-          <div className="flex items-center justify-between p-2 bg-white/5 mb-1">
-             <span className="hud-text text-muted-foreground">Filter Protocols</span>
-             <Target className="w-3 h-3 text-primary" />
+          <div className="flex items-center justify-between p-2 mb-1">
+             <span className="hud-text">Signal Filter</span>
+             <Target className="w-3 h-3 text-muted-foreground" />
           </div>
-          <div className="flex gap-1">
+          <div className="flex gap-1 bg-black/20 p-1">
             <Button 
               variant="ghost"
               onClick={() => setFilter('all')}
-              className={`flex-1 rounded-none font-mono text-xs uppercase border border-transparent ${filter === 'all' ? 'bg-primary/10 border-primary text-primary' : 'text-muted-foreground hover:bg-white/5'}`}
+              className={`flex-1 rounded-none font-mono text-[10px] uppercase h-8 ${filter === 'all' ? 'bg-white/10 text-white' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}
             >
-              All Units
+              All Signals
             </Button>
             <Button 
               variant="ghost"
               onClick={() => setFilter('exceptional')}
-              className={`flex-1 rounded-none font-mono text-xs uppercase border border-transparent ${filter === 'exceptional' ? 'bg-primary text-black font-bold' : 'text-muted-foreground hover:bg-white/5'}`}
+              className={`flex-1 rounded-none font-mono text-[10px] uppercase h-8 ${filter === 'exceptional' ? 'bg-secondary/10 text-secondary border border-secondary/20' : 'text-muted-foreground hover:text-white hover:bg-white/5'}`}
             >
               HVT Only
             </Button>
