@@ -1,0 +1,30 @@
+Create a Synthesis user journey story that tells a story of who this person is based on this data, what makes them exceptional based on key attributes findings and insights that are the opposite of 'ordinary, average, common, typical 
+
+On the user profile cardsI need a way to have an ability to potentially have tabs or a way to navigate to different sections under the user profiles header. In particular, I want a section that is this person's story, so their journey. I'm very interested in how they came to be at this point of time. So I want to build a profile that shows me a user journey or a video that talks about how they have come to be where they are today.And this will be based on data that we put into the system beyond surface level insights like a LinkedIn view of where they worked. We need to go deeper than that. We need to show the projects they've done in between. And the thing about LinkedIn that falls short is it doesn't tell the humanity of this person. It doesn't blend that story about who they are and why they are, where they work. It's just all work, which is too surface level. It doesn't give us enough context about the person. I need to know the humanity of them. I need to know why they're exceptional. So that's the point is to say this person is exceptional and here's the story elements related to why they're exceptional.
+
+In the UI example here is some context of an exception person that sounds more like a list of their greatest accomplishments rather than just a logo wall of places they worked:
+Summary: Extraordinary Achievements in Technology and Innovation
+Overview
+This document summarizes the remarkable accomplishments of an individual who has consistently pushed boundaries across multiple domains of technology, business, and innovation—all while maintaining a demanding personal life with a family of four children.
+Technology Innovation and Automation
+DemandScan Platform
+Developed an automated customer analysis system that delivers 80% time savings compared to traditional methods. Unlike frontier models that provide generalized answers, this system eliminates the dependency on users needing to formulate specific questions, making sophisticated analysis accessible to everyone.
+Behavioral Science Software
+Designed and built proprietary behavioral science software from scratch, demonstrating both technical expertise and understanding of human behavior patterns.
+Pioneering Industry Leadership
+Blockchain and Payments Innovation
+	•	Organized the world's first Ethereum hackathon, establishing early leadership in blockchain technology
+	•	Launched the world's first Account-to-Account (A2A) payments hackathon before industry standards had even emerged, demonstrating foresight in financial technology
+IoT Development
+Built Canada's largest IoT peer-to-peer network, contributing significantly to the country's connected device infrastructure.
+Ambient Intelligence
+Organized and ran an Ambient Intelligence conference, fostering discussion and development in this emerging field.
+Research and Development Approach
+Applied ethnographic research methodologies to software engineering, bringing a human-centered design approach to technical development. This interdisciplinary method ensures that technology solutions are grounded in real-world user needs and behaviors.
+Publishing Achievement
+Joined the elite group of less than 1% of aspiring authors who actually publish a book, demonstrating the ability to see major projects through to completion.
+Balancing Personal and Professional Life
+All these professional accomplishments were achieved while raising four children, demonstrating exceptional time management, dedication, and the ability to maintain work-life integration at a high level.
+Conclusion
+These achievements collectively represent a pattern of first-mover advantages, technical innovation, and the ability to identify and execute on emerging opportunities before they become mainstream—all characteristics that distinguish extraordinary contributions from ordinary participation in the technology sector.
+How might we diagnose a feature into our app using this conceptual idea and based on the constrains of our current UX/UI so that we integrate it with thoughtful care on how an end user can access this data from a user profile card?
