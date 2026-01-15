@@ -168,7 +168,9 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
             // We set alpha target to 0 to tell D3 we're done
             graphRef.current?.d3Force('charge')?.strength(0);
             graphRef.current?.d3Force('link')?.strength(0);
-            graphRef.current?.d3Force('cluster')?.strength(0);
+            // Custom force is a function, not a D3 force object, so it doesn't have .strength()
+            // We disable it by removing it
+            graphRef.current?.d3Force('cluster', null);
             
             // Or easier: pause the engine
             // React-force-graph doesn't expose a clean 'stop' method on the ref directly in types,
