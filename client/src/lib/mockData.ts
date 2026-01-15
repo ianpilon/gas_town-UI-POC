@@ -246,11 +246,10 @@ export function generateGraphData() {
     nodesByOrg[node.location].push(idx);
   });
 
-  // Generate Links (Prefer intra-cluster connections)
+  // Generate Links - ensure every node has at least one connection
+  const connectedNodes = new Set<string>();
+  
   nodes.forEach((node, i) => {
-    // Skip 25% of nodes to further reduce edge count
-    if (Math.random() < 0.25) return;
-    
     const numLinks = node.exceptional ? randomInt(1, 2) : 1;
     const orgNodes = nodesByOrg[node.location] || [];
 
@@ -271,7 +270,25 @@ export function generateGraphData() {
           source: node.id,
           target: nodes[targetIndex].id,
         });
+        connectedNodes.add(node.id);
+        connectedNodes.add(nodes[targetIndex].id);
       }
+    }
+  });
+  
+  // Ensure orphan nodes get at least one connection
+  nodes.forEach((node, i) => {
+    if (!connectedNodes.has(node.id)) {
+      const orgNodes = nodesByOrg[node.location] || [];
+      let targetIndex = orgNodes.length > 1 
+        ? orgNodes[randomInt(0, orgNodes.length - 1)]
+        : randomInt(0, nodes.length - 1);
+      if (targetIndex === i) targetIndex = (i + 1) % nodes.length;
+      
+      links.push({
+        source: node.id,
+        target: nodes[targetIndex].id,
+      });
     }
   });
 

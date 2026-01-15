@@ -28,6 +28,7 @@ export default function Home() {
         onNodeClick={setSelectedNode} 
         filter={filter}
         onZoomChange={setZoomLevel}
+        selectedNodeId={selectedNode?.id || null}
       />
 
       {/* Header / Nav Overlay */}

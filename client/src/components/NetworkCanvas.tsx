@@ -10,11 +10,30 @@ interface NetworkCanvasProps {
   onNodeClick: (node: any) => void;
   filter: 'all' | 'exceptional';
   onZoomChange?: (zoom: number) => void;
+  selectedNodeId?: string | null;
 }
 
-export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange }: NetworkCanvasProps) {
+export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange, selectedNodeId }: NetworkCanvasProps) {
   const graphRef = useRef<any>(null);
   const [dimensions, setDimensions] = useState({ w: window.innerWidth, h: window.innerHeight });
+  
+  // Build set of neighbor IDs for the selected node
+  const neighborIds = useMemo(() => {
+    if (!selectedNodeId) return new Set<string>();
+    
+    const neighbors = new Set<string>();
+    neighbors.add(selectedNodeId);
+    
+    data.links.forEach((link: any) => {
+      const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+      const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+      
+      if (sourceId === selectedNodeId) neighbors.add(targetId);
+      if (targetId === selectedNodeId) neighbors.add(sourceId);
+    });
+    
+    return neighbors;
+  }, [selectedNodeId, data.links]);
 
   useEffect(() => {
     const handleResize = () => {
@@ -129,35 +148,50 @@ export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange }: Netwo
   const paintNode = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const isExceptional = node.exceptional;
     const isFilteredOut = filter === 'exceptional' && !isExceptional;
+    const isSelected = node.id === selectedNodeId;
+    const isNeighbor = neighborIds.has(node.id);
+    const hasSelection = selectedNodeId !== null && selectedNodeId !== undefined;
     
-    const opacity = isFilteredOut ? 0.02 : 1; // Even more faded when filtered
+    // Opacity: faded if filtered, or if there's a selection and this node isn't connected
+    let opacity = 1;
+    if (isFilteredOut) {
+      opacity = 0.02;
+    } else if (hasSelection && !isNeighbor) {
+      opacity = 0.15; // Fade non-connected nodes when something is selected
+    }
     
-    // Draw glow for exceptional nodes
+    // Draw glow for exceptional nodes (brighter if selected/neighbor)
     if (isExceptional && !isFilteredOut) {
       ctx.beginPath();
-      ctx.arc(node.x, node.y, 6, 0, 2 * Math.PI, false);
-      ctx.fillStyle = 'rgba(252, 165, 165, 0.15)';
+      const glowSize = isSelected ? 10 : (isNeighbor && hasSelection ? 8 : 6);
+      ctx.arc(node.x, node.y, glowSize, 0, 2 * Math.PI, false);
+      ctx.fillStyle = isSelected ? 'rgba(252, 165, 165, 0.35)' : 'rgba(252, 165, 165, 0.15)';
+      ctx.globalAlpha = hasSelection && !isNeighbor ? 0.15 : 1;
       ctx.fill();
       
       // Target ring
       ctx.strokeStyle = '#fca5a5';
-      ctx.lineWidth = 0.3;
+      ctx.lineWidth = isSelected ? 0.8 : 0.3;
       ctx.beginPath();
-      ctx.arc(node.x, node.y, 5, 0, 2 * Math.PI, false);
+      ctx.arc(node.x, node.y, glowSize - 1, 0, 2 * Math.PI, false);
       ctx.stroke();
     }
 
-    // Node Body - smaller for dense graph
-    const size = isExceptional ? 3 : 1.5;
+    // Node Body - larger if selected
+    const baseSize = isExceptional ? 3 : 1.5;
+    const size = isSelected ? baseSize * 2 : (isNeighbor && hasSelection ? baseSize * 1.3 : baseSize);
     ctx.beginPath();
     ctx.arc(node.x, node.y, size, 0, 2 * Math.PI, false);
     
-    // COLORS: Pastel Blue (Primary) vs Pastel Red (Exceptional) vs Dark Slate (Regular)
-    if (isExceptional) {
-       ctx.fillStyle = '#fca5a5'; // Pastel Red
+    // COLORS: Highlight connected nodes
+    if (isSelected) {
+      ctx.fillStyle = '#82cfff'; // Bright blue for selected
+    } else if (isExceptional) {
+      ctx.fillStyle = '#fca5a5'; // Pastel Red
+    } else if (isNeighbor && hasSelection) {
+      ctx.fillStyle = '#94a3b8'; // Brighter slate for neighbors
     } else {
-       // Vary the grey slightly for texture
-       ctx.fillStyle = '#475569'; // Slate-600
+      ctx.fillStyle = '#475569'; // Slate-600
     }
     
     ctx.globalAlpha = opacity;
@@ -166,15 +200,18 @@ export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange }: Netwo
     // Reset alpha
     ctx.globalAlpha = 1;
 
-    // Draw label on hover or high scale
-    if (globalScale > 2.5 && !isFilteredOut) {
-       ctx.font = '400 4px "Share Tech Mono"';
+    // Draw label for selected node or neighbors, or at high zoom
+    const showLabel = isSelected || (isNeighbor && hasSelection) || (globalScale > 2.5 && !isFilteredOut);
+    if (showLabel && !isFilteredOut) {
+       ctx.font = isSelected ? 'bold 5px "Share Tech Mono"' : '400 4px "Share Tech Mono"';
        ctx.textAlign = 'left';
        ctx.textBaseline = 'middle';
-       ctx.fillStyle = isExceptional ? '#fca5a5' : 'rgba(255,255,255,0.4)';
-       ctx.fillText(`${node.name}`, node.x + 8, node.y);
+       ctx.fillStyle = isSelected ? '#82cfff' : (isExceptional ? '#fca5a5' : 'rgba(255,255,255,0.5)');
+       ctx.globalAlpha = hasSelection && !isNeighbor ? 0.15 : 1;
+       ctx.fillText(`${node.name}`, node.x + size + 4, node.y);
+       ctx.globalAlpha = 1;
     }
-  }, [filter]);
+  }, [filter, selectedNodeId, neighborIds]);
 
   return (
     <div className="absolute inset-0 bg-background overflow-hidden cursor-grab active:cursor-grabbing">
@@ -186,8 +223,20 @@ export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange }: Netwo
         nodeLabel="name"
         backgroundColor="#00000000" // Transparent
         nodeRelSize={4}
-        linkColor={() => 'rgba(100, 116, 139, 0.6)'}
-        linkWidth={0.8}
+        linkColor={(link: any) => {
+          if (!selectedNodeId) return 'rgba(100, 116, 139, 0.6)';
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          const isConnected = sourceId === selectedNodeId || targetId === selectedNodeId;
+          return isConnected ? 'rgba(130, 207, 255, 0.9)' : 'rgba(100, 116, 139, 0.1)';
+        }}
+        linkWidth={(link: any) => {
+          if (!selectedNodeId) return 0.8;
+          const sourceId = typeof link.source === 'object' ? link.source.id : link.source;
+          const targetId = typeof link.target === 'object' ? link.target.id : link.target;
+          const isConnected = sourceId === selectedNodeId || targetId === selectedNodeId;
+          return isConnected ? 1.5 : 0.3;
+        }}
         minZoom={0.5}
         maxZoom={2.4}
         onNodeClick={(node: any) => {
