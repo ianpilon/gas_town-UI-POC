@@ -6,7 +6,7 @@ import { generateGraphData, NodeData } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnimatePresence } from 'framer-motion';
-import { Crosshair, ShieldAlert, Target, Share2, Terminal } from 'lucide-react';
+import { Crosshair, ShieldAlert, Target, Share2 } from 'lucide-react';
 
 // Generate data once (total ~27,500 nodes across all organizations)
 const graphData = generateGraphData();
@@ -70,9 +70,6 @@ export default function Home() {
         </div>
 
         <div className="pointer-events-auto flex gap-3 relative">
-          <Button variant="outline" className="hud-panel border-white/5 text-xs font-mono uppercase hover:bg-white/5 text-muted-foreground hover:text-foreground rounded-none h-10 px-4">
-            <Terminal className="w-3 h-3 mr-2" /> Logs
-          </Button>
           <Button 
             onClick={() => setIsTwitterOpen(!isTwitterOpen)}
             className={`bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/50 font-mono uppercase rounded-none h-10 px-6 backdrop-blur-sm transition-all ${isTwitterOpen ? 'bg-primary/20 border-primary/50' : ''}`}
