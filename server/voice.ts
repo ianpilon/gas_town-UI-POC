@@ -42,19 +42,14 @@ export function setupVoiceWebSocket(httpServer: Server) {
             voice: "Ara",
             instructions:
               "You are a helpful assistant integrated into a talent reconnaissance system called SentriX. When users ask about people or request to see profiles, provide brief helpful responses. Keep responses concise and professional.",
-            audio: {
-              input: {
-                format: {
-                  type: "audio/pcm",
-                  rate: 24000,
-                },
-              },
-              output: {
-                format: {
-                  type: "audio/pcm",
-                  rate: 24000,
-                },
-              },
+            modalities: ["text", "audio"],
+            input_audio_format: "pcm16",
+            output_audio_format: "pcm16",
+            turn_detection: {
+              type: "server_vad",
+              threshold: 0.5,
+              prefix_padding_ms: 300,
+              silence_duration_ms: 800,
             },
           },
         })
