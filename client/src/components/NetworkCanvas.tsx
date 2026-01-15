@@ -33,6 +33,15 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
     });
   }, []);
 
+  const clusterCenters: Record<number, {x: number, y: number, label: string}> = {
+    0: { x: -300, y: 0, label: 'San Francisco' },
+    1: { x: 300, y: -200, label: 'New York' },
+    2: { x: 500, y: -50, label: 'Toronto' },
+    3: { x: -200, y: -300, label: 'Waterloo' },
+    4: { x: 200, y: 250, label: 'Austin' },
+    5: { x: -100, y: 400, label: 'Remote' },
+  };
+
   // Configure Forces for "Cluster" layout
   useEffect(() => {
     if (graphRef.current) {
@@ -54,31 +63,8 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
       // This forces the "geographic" separation
       const clusterForce = (alpha: number) => {
         data.nodes.forEach((node: any) => {
-          // Define explicit centers for clusters (8 clusters total in mockData)
-          // We distribute them in a ring or varied positions
           const clusterId = node.clusterGroup || 0;
-          
-          // SF (0) - Center Left (Large)
-          // NY (1) - Top Right
-          // London (2) - Far Right
-          // Waterloo (3) - Top Left
-          // Remote (4) - Bottom Center (Scattered)
-          // Tokyo (5) - Bottom Right
-          // Berlin (6) - Top Center
-          // Singapore (7) - Bottom Left
-          
-          const centers: Record<number, {x: number, y: number}> = {
-            0: { x: -300, y: 0 },    // SF
-            1: { x: 300, y: -200 },  // NY
-            2: { x: 500, y: -50 },   // London
-            3: { x: -200, y: -300 }, // Waterloo
-            4: { x: 0, y: 400 },     // Remote
-            5: { x: 400, y: 300 },   // Tokyo
-            6: { x: 100, y: -400 },  // Berlin
-            7: { x: -400, y: 200 },  // Singapore
-          };
-          
-          const target = centers[clusterId] || { x: 0, y: 0 };
+          const target = clusterCenters[clusterId] || { x: 0, y: 0 };
           
           // Move towards target
           node.vx += (target.x - node.x) * 1 * alpha;
@@ -93,6 +79,24 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
       graphRef.current.d3ReheatSimulation();
     }
   }, [graphRef.current, data]);
+
+  const drawClusterLabels = useCallback((ctx: CanvasRenderingContext2D, globalScale: number) => {
+    // Only draw labels if we're not zoomed in too far (to avoid clutter)
+    // or always draw them? Let's draw them always but fade them out if zoomed in extremely close?
+    // Actually, drawing them "behind" everything is nice.
+    
+    ctx.save();
+    ctx.font = '700 40px "Space Grotesk"';
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = 'rgba(255, 255, 255, 0.08)'; // Very subtle, giant background text
+    
+    Object.values(clusterCenters).forEach(center => {
+      ctx.fillText(center.label.toUpperCase(), center.x, center.y);
+    });
+    
+    ctx.restore();
+  }, []);
 
   const paintNode = useCallback((node: any, ctx: CanvasRenderingContext2D, globalScale: number) => {
     const isExceptional = node.exceptional;
@@ -171,6 +175,7 @@ export function NetworkCanvas({ data, onNodeClick, filter }: NetworkCanvasProps)
             onNodeClick(node);
         }}
         nodeCanvasObject={paintNode}
+        onRenderFramePre={drawClusterLabels}
         cooldownTicks={200} // Longer cooldown to let it settle
         d3AlphaDecay={0.01} // Slower decay for better settling
         d3VelocityDecay={0.4} // More friction to stop jitter

@@ -14,14 +14,12 @@ const skillsList = ['React', 'Python', 'TensorFlow', 'Rust', 'Go', 'Kubernetes',
 
 // Define locations with relative weights/masses
 const locations = [
-  { name: 'San Francisco', weight: 0.4 }, // 40%
-  { name: 'New York', weight: 0.15 },     // 15%
-  { name: 'London', weight: 0.1 },        // 10%
-  { name: 'Waterloo', weight: 0.05 },     // 5%
-  { name: 'Remote', weight: 0.15 },       // 15%
-  { name: 'Tokyo', weight: 0.05 },        // 5%
-  { name: 'Berlin', weight: 0.05 },       // 5%
-  { name: 'Singapore', weight: 0.05 },    // 5%
+  { name: 'San Francisco', weight: 0.3 }, 
+  { name: 'New York', weight: 0.2 },     
+  { name: 'Toronto', weight: 0.15 },        
+  { name: 'Waterloo', weight: 0.1 },     
+  { name: 'Austin', weight: 0.1 },       
+  { name: 'Remote', weight: 0.15 },       
 ];
 
 function randomItem<T>(arr: T[]): T {
