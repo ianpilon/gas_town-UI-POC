@@ -38,9 +38,7 @@ export default function Home() {
              </div>
              <div className="h-px bg-white/5 w-full mb-3" />
              <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground flex items-center gap-3">
-               <svg viewBox="0 0 60 24" className="h-5 w-auto" fill="white">
-                 <text x="0" y="20" fontFamily="Arial Black, Arial" fontWeight="900" fontSize="24" letterSpacing="-1">xAI</text>
-               </svg>
+               <img src="/xai-logo.png" alt="xAI" className="h-6 w-auto" />
                Talent Grid <span className="text-white/20">V.04</span>
              </h1>
              <p className="hud-text mt-1">
