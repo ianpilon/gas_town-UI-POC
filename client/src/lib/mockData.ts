@@ -12,12 +12,36 @@ const companies = ['Google', 'OpenAI', 'Anthropic', 'Meta', 'Netflix', 'Stripe',
 
 const skillsList = ['React', 'Python', 'TensorFlow', 'Rust', 'Go', 'Kubernetes', 'Design Systems', 'NLP', 'Computer Vision', 'Smart Contracts', 'GraphQL', 'AWS'];
 
+// Define locations with relative weights/masses
+const locations = [
+  { name: 'San Francisco', weight: 0.4 }, // 40%
+  { name: 'New York', weight: 0.15 },     // 15%
+  { name: 'London', weight: 0.1 },        // 10%
+  { name: 'Waterloo', weight: 0.05 },     // 5%
+  { name: 'Remote', weight: 0.15 },       // 15%
+  { name: 'Tokyo', weight: 0.05 },        // 5%
+  { name: 'Berlin', weight: 0.05 },       // 5%
+  { name: 'Singapore', weight: 0.05 },    // 5%
+];
+
 function randomItem<T>(arr: T[]): T {
   return arr[Math.floor(Math.random() * arr.length)];
 }
 
 function randomInt(min: number, max: number) {
   return Math.floor(Math.random() * (max - min + 1)) + min;
+}
+
+function getRandomLocation() {
+  const rand = Math.random();
+  let cumulativeWeight = 0;
+  for (const loc of locations) {
+    cumulativeWeight += loc.weight;
+    if (rand < cumulativeWeight) {
+      return loc.name;
+    }
+  }
+  return locations[0].name; // Fallback
 }
 
 export interface NodeData {
@@ -45,17 +69,23 @@ export interface NodeData {
   };
   yearsExperience: number;
   location: string;
+  clusterGroup: number; // For visualization coloring if needed
 }
 
 export function generateGraphData(count: number = 1000) {
   const nodes: NodeData[] = [];
   const links: { source: string; target: string }[] = [];
 
+  // 1. Generate Nodes assigned to locations
   for (let i = 0; i < count; i++) {
     const isExceptional = Math.random() > 0.85; // Top 15%
     const fn = randomItem(firstNames);
     const ln = randomItem(lastNames);
+    const location = getRandomLocation();
     
+    // Assign a cluster group ID based on location index
+    const locationIdx = locations.findIndex(l => l.name === location);
+
     nodes.push({
       id: `u${i}`,
       name: `${fn} ${ln}`,
@@ -80,32 +110,46 @@ export function generateGraphData(count: number = 1000) {
         website: `${fn.toLowerCase()}.dev`,
       },
       yearsExperience: randomInt(1, 15),
-      location: randomItem(['San Francisco', 'New York', 'London', 'Remote', 'Tokyo', 'Berlin', 'Singapore']),
+      location: location,
+      clusterGroup: locationIdx,
     });
-
-    // Create random connections (small world network ish)
-    // Connect to 1-3 previous nodes to ensure connectivity without chaos
-    if (i > 0) {
-      const numLinks = randomInt(1, 3);
-      for (let j = 0; j < numLinks; j++) {
-        const targetIndex = randomInt(0, i - 1);
-        links.push({
-          source: `u${i}`,
-          target: `u${targetIndex}`,
-        });
-      }
-    }
   }
 
-  // Add some "Super Connectors" (Hubs)
-  const hubs = [0, 10, 50, 100];
-  hubs.forEach(hubIdx => {
-    if (hubIdx < count) {
-      for (let k = 0; k < 20; k++) {
-        const target = randomInt(0, count - 1);
-        if (target !== hubIdx) {
-           links.push({ source: `u${hubIdx}`, target: `u${target}` });
-        }
+  // 2. Generate Links (Prefer intra-cluster connections)
+  // We'll iterate through nodes and connect them
+  nodes.forEach((node, i) => {
+    // Determine how many connections this node has
+    // Exceptional nodes might have more connections
+    const numLinks = node.exceptional ? randomInt(3, 8) : randomInt(1, 4);
+
+    for (let j = 0; j < numLinks; j++) {
+      let targetIndex;
+      const stayInCluster = Math.random() > 0.15; // 85% chance to stay in cluster
+
+      if (stayInCluster) {
+        // Find a random node in the same location
+        // This acts as a filter, so might be slow if we just loop. 
+        // Optimization: pick random indices until we find one in same location.
+        // Or better: Pre-group indices by location.
+        
+        // Simple approach for 1000 nodes: Just try 10 times to find a match, otherwise random
+        let attempts = 0;
+        do {
+           targetIndex = randomInt(0, count - 1);
+           attempts++;
+        } while (nodes[targetIndex].location !== node.location && attempts < 10);
+      } else {
+        // Connect to anywhere (bridge between clusters)
+        targetIndex = randomInt(0, count - 1);
+      }
+
+      if (targetIndex !== i) {
+        // Check if link already exists (simple string check or just push and let graph handle dupes)
+        // ForceGraph handles dupes usually, but cleaner to not have self-loops
+        links.push({
+          source: node.id,
+          target: nodes[targetIndex].id,
+        });
       }
     }
   });
