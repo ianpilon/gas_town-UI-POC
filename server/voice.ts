@@ -68,7 +68,7 @@ export function setupVoiceWebSocket(httpServer: Server) {
         if (data instanceof Buffer) {
           xaiWs.send(
             JSON.stringify({
-              type: "audio.append",
+              type: "input_audio_buffer.append",
               audio: data.toString("base64"),
             })
           );
