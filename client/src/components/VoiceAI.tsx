@@ -22,33 +22,80 @@ export function VoiceAI({ peopleData, onPersonFound }: VoiceAIProps) {
   const audioQueueRef = useRef<ArrayBuffer[]>([]);
   const isPlayingRef = useRef(false);
 
+  const lastFoundRef = useRef<string | null>(null);
+  const lastFoundTimeRef = useRef<number>(0);
+  
+  const resetLastFound = useCallback(() => {
+    lastFoundRef.current = null;
+  }, []);
+  
   const checkForProfileRequest = useCallback((text: string) => {
-    const patterns = [
-      /(?:show me|display|pull up|find)\s+([a-z\s]+?)(?:'s|\s+profile|\s*$|\.)/i,
-      /(?:tell me about|who is)\s+([a-z\s]+?)(?:'s|\s*$|\.)/i,
+    const lowerText = text.toLowerCase();
+    
+    // User command patterns - match on normalized text
+    const userPatterns = [
+      /(?:show me|display|pull up|find|open)\s+([a-z\s'-]+?)(?:'s|\s+profile|\s*$|[.,])/,
+      /(?:tell me about|who is|look up)\s+([a-z\s'-]+?)(?:'s|\s*$|[.,])/,
+    ];
+    
+    // AI response patterns - explicit triggers for "Displaying/Showing [name]"
+    const aiPatterns = [
+      /(?:displaying|showing)\s+([a-z\s'-]+?)(?:\s*$|[.,!])/,
+      /(?:found|here's|here is)\s+([a-z\s'-]+?)(?:'s\s+profile|\s+profile|[.,]|\s*$)/,
+      /profile\s+(?:for|of)\s+([a-z\s'-]+?)(?:[.,]|\s*$)/,
     ];
 
-    for (const pattern of patterns) {
-      const match = text.match(pattern);
-      if (match) {
-        const requestedName = match[1].trim().toLowerCase();
-        if (requestedName.length < 2) continue;
+    const allPatterns = [...userPatterns, ...aiPatterns];
 
+    for (const pattern of allPatterns) {
+      const match = lowerText.match(pattern);
+      if (match) {
+        const requestedName = match[1].trim();
+        if (requestedName.length < 3) continue;
+        
+        // Skip common words that aren't names
+        const skipWords = ['the', 'this', 'that', 'profile', 'person', 'someone', 'anybody', 'everyone', 'a', 'an'];
+        if (skipWords.includes(requestedName)) continue;
+
+        // Find best matching person
         const person = peopleData.find(p => {
           const fullName = p.name.toLowerCase();
-          const firstName = p.name.split(' ')[0].toLowerCase();
-          const lastName = p.name.split(' ').pop()?.toLowerCase() || '';
+          const nameParts = fullName.split(' ');
+          const firstName = nameParts[0];
+          const lastName = nameParts[nameParts.length - 1];
 
-          return requestedName.includes(firstName) ||
-                 requestedName.includes(lastName) ||
-                 fullName.includes(requestedName);
+          // Exact full name match
+          if (fullName === requestedName) return true;
+          
+          // Full name contains requested (at least 4 chars to avoid false positives)
+          if (requestedName.length >= 4 && fullName.includes(requestedName)) return true;
+          
+          // First or last name exact match
+          if (firstName === requestedName || lastName === requestedName) return true;
+          
+          // Partial match with minimum length
+          if (requestedName.length >= 4) {
+            if (firstName.startsWith(requestedName) || lastName.startsWith(requestedName)) return true;
+          }
+
+          return false;
         });
 
-        if (person) {
+        // Allow re-trigger after 3 seconds cooldown for same person
+        const now = Date.now();
+        const canTrigger = person && (
+          person.id !== lastFoundRef.current || 
+          (now - lastFoundTimeRef.current) > 3000
+        );
+
+        if (canTrigger && person) {
+          lastFoundRef.current = person.id;
+          lastFoundTimeRef.current = now;
+          console.log('[VoiceAI] Found person:', person.name, 'from text:', text);
           setTimeout(() => {
             onPersonFound(person);
-            setStatus(`Found: ${person.name}`);
-          }, 600);
+            setStatus(`Showing: ${person.name}`);
+          }, 300);
           return true;
         }
       }
@@ -142,6 +189,7 @@ export function VoiceAI({ peopleData, onPersonFound }: VoiceAIProps) {
       if (data.type === 'input_audio_buffer.speech_started' || data.type === 'speech.started') {
         setStatus('Hearing you...');
         setTranscript('');
+        resetLastFound();
       }
 
       if (data.type === 'input_audio_buffer.speech_stopped' || data.type === 'speech.stopped') {
