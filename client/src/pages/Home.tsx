@@ -6,7 +6,7 @@ import { generateGraphData, NodeData } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnimatePresence } from 'framer-motion';
-import { Crosshair, ShieldAlert, Target, Share2, Search } from 'lucide-react';
+import { Crosshair, ShieldAlert, Target, Share2, Search, Globe } from 'lucide-react';
 import { VoiceAI } from '@/components/VoiceAI';
 
 // Generate data once (total ~27,500 nodes across all organizations)
@@ -81,7 +81,7 @@ export default function Home() {
              </div>
              <div className="h-px bg-white/5 w-full mb-3" />
              <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground flex items-center gap-3">
-               <img src="/xai-logo.png" alt="xAI" className="h-6 w-auto" />
+               <Globe className="h-6 w-6 text-primary" />
                Talent Graph <span className="text-white/20">V.01</span>
              </h1>
              <p className="hud-text mt-1">
