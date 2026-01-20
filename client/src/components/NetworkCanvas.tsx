@@ -180,6 +180,11 @@ export function NetworkCanvas({ data, onNodeClick, filter, onZoomChange, selecte
     const isNeighbor = neighborIds.has(node.id);
     const hasSelection = selectedNodeId !== null && selectedNodeId !== undefined;
     
+    // Skip rendering non-exceptional nodes entirely (remove grey background nodes)
+    if (!isExceptional) {
+      return;
+    }
+    
     // Opacity: faded if filtered, or if there's a selection and this node isn't connected
     let opacity = 1;
     if (isFilteredOut) {
