@@ -4,7 +4,11 @@
 
 https://github.com/user-attachments/assets/gas_town_UI_POC_ian_pilon_70mb.mp4
 
-<video src="https://github.com/ianpilon/gas_town-UI-POC/raw/main/gas_town_UI_POC_ian_pilon_70mb.mp4" controls width="100%"></video>
+
+
+https://github.com/user-attachments/assets/adea1279-43df-4958-9d67-39923e4f5119
+
+
 
 ## Overview
 
