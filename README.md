@@ -2,7 +2,9 @@
 
 ## Demo
 
-[📺 Watch Demo Video (53MB)](https://github.com/ianpilon/gas_town-UI-POC/raw/main/gas_town_UI_POC_ian_pilon_70mb.mp4)
+https://github.com/user-attachments/assets/gas_town_UI_POC_ian_pilon_70mb.mp4
+
+<video src="https://github.com/ianpilon/gas_town-UI-POC/raw/main/gas_town_UI_POC_ian_pilon_70mb.mp4" controls width="100%"></video>
 
 ## Overview
 
