@@ -77,12 +77,12 @@ export default function Home() {
           <div className="hud-panel p-4 w-72 hud-corner-tl">
              <div className="flex items-center gap-3 mb-2">
                 <div className="status-indicator" />
-                <span className="hud-text text-primary font-bold">Akatos Talent</span>
+                <span className="hud-text text-primary font-bold">multi-agent orchestration</span>
              </div>
              <div className="h-px bg-white/5 w-full mb-3" />
              <h1 className="text-2xl font-bold uppercase tracking-wider text-foreground flex items-center gap-3">
                <Globe className="h-6 w-6 text-primary" />
-               Talent Graph <span className="text-white/20">V.01</span>
+               Gas Town <span className="text-white/20">V.01</span>
              </h1>
              <p className="hud-text mt-1">
                 Sector: <span className="text-secondary">Global</span> // Status: <span className="text-primary">Online</span>
