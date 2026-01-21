@@ -119,6 +119,27 @@ export interface HookState {
   lastSync: string;
 }
 
+export interface CodeChange {
+  id: string;
+  filePath: string;
+  lineStart: number;
+  lineEnd: number;
+  oldCode: string;
+  newCode: string;
+  status: 'pending' | 'approved' | 'rejected';
+  timestamp: string;
+}
+
+export interface ActiveFile {
+  path: string;
+  language: string;
+  agentId: string;
+  agentName: string;
+  lineStart: number;
+  lineEnd: number;
+  changeType: 'add' | 'modify' | 'delete';
+}
+
 export interface NodeData {
   id: string;
   name: string;
@@ -164,6 +185,8 @@ export interface NodeData {
   isEphemeral: boolean;
   spawnTime: string;
   taskCompletionRate: number;
+  currentFile: string | null;
+  codeChanges: CodeChange[];
 }
 
 function generateBeads(count: number): Bead[] {
@@ -227,6 +250,118 @@ function generateHookState(): HookState {
   };
 }
 
+// Mock code snippets for realistic diffs
+const codeSnippets = [
+  {
+    filePath: 'src/services/auth.ts',
+    oldCode: `export async function validateToken(token: string) {
+  return jwt.verify(token, SECRET);
+}`,
+    newCode: `export async function validateToken(token: string) {
+  if (!token) throw new AuthError('Token required');
+  const decoded = jwt.verify(token, SECRET);
+  await checkTokenRevocation(decoded.jti);
+  return decoded;
+}`,
+  },
+  {
+    filePath: 'src/api/routes.ts',
+    oldCode: `router.get('/users', async (req, res) => {
+  const users = await db.users.findAll();
+  res.json(users);
+});`,
+    newCode: `router.get('/users', rateLimit(100), async (req, res) => {
+  const { page = 1, limit = 20 } = req.query;
+  const users = await db.users.findPaginated({ page, limit });
+  res.json({ data: users, pagination: { page, limit } });
+});`,
+  },
+  {
+    filePath: 'src/utils/cache.ts',
+    oldCode: `const cache = new Map();`,
+    newCode: `const cache = new LRUCache({
+  max: 500,
+  ttl: 1000 * 60 * 5,
+  updateAgeOnGet: true,
+});`,
+  },
+  {
+    filePath: 'src/components/Dashboard.tsx',
+    oldCode: `function Dashboard() {
+  return <div>Dashboard</div>;
+}`,
+    newCode: `function Dashboard() {
+  const { data, isLoading } = useQuery('stats', fetchStats);
+  if (isLoading) return <Skeleton />;
+  return (
+    <div className="grid grid-cols-3 gap-4">
+      <StatCard title="Active Users" value={data.users} />
+      <StatCard title="Revenue" value={data.revenue} />
+      <StatCard title="Tasks" value={data.tasks} />
+    </div>
+  );
+}`,
+  },
+  {
+    filePath: 'src/workers/processor.ts',
+    oldCode: `process.on('message', (msg) => {
+  handleMessage(msg);
+});`,
+    newCode: `process.on('message', async (msg) => {
+  const span = tracer.startSpan('worker.process');
+  try {
+    await handleMessage(msg);
+    span.setStatus({ code: SpanStatusCode.OK });
+  } catch (err) {
+    span.recordException(err);
+    throw err;
+  } finally {
+    span.end();
+  }
+});`,
+  },
+  {
+    filePath: 'src/db/migrations/001_add_indexes.sql',
+    oldCode: `-- No indexes`,
+    newCode: `CREATE INDEX idx_users_email ON users(email);
+CREATE INDEX idx_tasks_status ON tasks(status);
+CREATE INDEX idx_sessions_user_id ON sessions(user_id);`,
+  },
+];
+
+const fileTemplates = [
+  'src/services/auth.ts',
+  'src/api/routes.ts',
+  'src/utils/cache.ts',
+  'src/components/Dashboard.tsx',
+  'src/workers/processor.ts',
+  'src/db/queries.ts',
+  'src/hooks/useAuth.ts',
+  'src/middleware/validation.ts',
+  'src/config/env.ts',
+  'tests/auth.test.ts',
+];
+
+function generateCodeChanges(count: number, agentId: string): CodeChange[] {
+  const changes: CodeChange[] = [];
+  const statuses: CodeChange['status'][] = ['pending', 'approved', 'rejected'];
+  
+  for (let i = 0; i < count; i++) {
+    const snippet = randomItem(codeSnippets);
+    changes.push({
+      id: `change-${agentId}-${i}`,
+      filePath: snippet.filePath,
+      lineStart: randomInt(1, 100),
+      lineEnd: randomInt(101, 200),
+      oldCode: snippet.oldCode,
+      newCode: snippet.newCode,
+      status: i === 0 ? 'pending' : randomItem(statuses),
+      timestamp: `${randomInt(1, 30)}m ago`,
+    });
+  }
+  return changes;
+}
+
 // Create The Mayor - the primary coordinator
 function createMayor(): NodeData {
   return {
@@ -283,6 +418,8 @@ function createMayor(): NodeData {
     isEphemeral: false,
     spawnTime: '72h ago',
     taskCompletionRate: 100,
+    currentFile: null,
+    codeChanges: [],
   };
 }
 
@@ -356,6 +493,8 @@ function createPolecat(index: number, convoyIndex: number): NodeData {
     isEphemeral: true,
     spawnTime: `${randomInt(1, 48)}h ago`,
     taskCompletionRate: completionRate,
+    currentFile: status === 'active' || status === 'waiting' ? randomItem(fileTemplates) : null,
+    codeChanges: status === 'active' ? generateCodeChanges(randomInt(1, 3), `polecat-${index}`) : [],
   };
 }
 

@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import React, { useState } from 'react';
 import { NodeData, statusColors, convoyColors } from '@/lib/mockData';
-import { X, Database, Sparkles, Route, Users, Bot, GitBranch, Package, Mail, Clock, CheckCircle, AlertCircle, Pause, Play, Circle } from 'lucide-react';
+import { X, Database, Sparkles, Route, Users, Bot, GitBranch, Package, Mail, Clock, CheckCircle, AlertCircle, Pause, Play, Circle, FileCode, Check, XCircle, Plus, Minus } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -13,7 +13,7 @@ interface ProfileCardProps {
   onNodeSelect?: (node: NodeData) => void;
 }
 
-type TabType = 'overview' | 'beads' | 'mailbox';
+type TabType = 'overview' | 'beads' | 'mailbox' | 'code';
 
 export function ProfileCard({ node, onClose, graphData, onNodeSelect }: ProfileCardProps) {
   const [activeTab, setActiveTab] = useState<TabType>('overview');
@@ -119,6 +119,13 @@ export function ProfileCard({ node, onClose, graphData, onNodeSelect }: ProfileC
             label="Mailbox"
             badge={node.mailbox.filter(m => !m.read).length}
           />
+          <TabButton 
+            active={activeTab === 'code'} 
+            onClick={() => setActiveTab('code')}
+            icon={<FileCode className="w-3 h-3" />}
+            label="Code"
+            badge={node.codeChanges.filter(c => c.status === 'pending').length}
+          />
         </div>
         
         {/* Tab Content */}
@@ -126,6 +133,7 @@ export function ProfileCard({ node, onClose, graphData, onNodeSelect }: ProfileC
           {activeTab === 'overview' && <OverviewTab node={node} connections={connections} onNodeSelect={onNodeSelect} convoyColor={convoyColor} />}
           {activeTab === 'beads' && <BeadsTab node={node} />}
           {activeTab === 'mailbox' && <MailboxTab node={node} />}
+          {activeTab === 'code' && <CodeTab node={node} />}
         </div>
         
         {/* Footer */}
@@ -471,6 +479,112 @@ function TechBar({ label, value }: { label: string, value: number }) {
              className={`h-full flex-1 ${i < (value / 5) ? 'bg-primary/80' : 'bg-transparent'}`} 
            />
         ))}
+      </div>
+    </div>
+  );
+}
+
+function CodeTab({ node }: { node: NodeData }) {
+  return (
+    <div className="p-4 space-y-4">
+      {/* Current File */}
+      {node.currentFile && (
+        <div className="space-y-2">
+          <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest">
+            Current File
+          </h3>
+          <div className="bg-white/[0.02] p-3 border border-white/5 flex items-center gap-2">
+            <FileCode className="w-4 h-4 text-blue-400" />
+            <span className="text-xs font-mono text-foreground">{node.currentFile}</span>
+          </div>
+        </div>
+      )}
+
+      {/* Pending Changes */}
+      <div className="space-y-2">
+        <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest">
+          Code Changes ({node.codeChanges.length})
+        </h3>
+        
+        {node.codeChanges.length === 0 ? (
+          <div className="text-center py-8 text-muted-foreground text-sm">
+            No code changes
+          </div>
+        ) : (
+          <div className="space-y-3">
+            {node.codeChanges.map(change => (
+              <div key={change.id} className="border border-white/5 bg-[#0d0f12]">
+                <div className="flex items-center justify-between px-3 py-2 border-b border-white/5 bg-white/[0.02]">
+                  <div className="flex items-center gap-2">
+                    <FileCode className="w-3.5 h-3.5 text-primary" />
+                    <span className="text-[10px] font-mono text-foreground truncate max-w-[180px]">{change.filePath}</span>
+                    <Badge 
+                      variant="outline" 
+                      className={`rounded-none text-[8px] ${
+                        change.status === 'pending' 
+                          ? 'border-amber-500/30 text-amber-500' 
+                          : change.status === 'approved'
+                          ? 'border-emerald-500/30 text-emerald-500'
+                          : 'border-red-500/30 text-red-500'
+                      }`}
+                    >
+                      {change.status.toUpperCase()}
+                    </Badge>
+                  </div>
+                  {change.status === 'pending' && (
+                    <div className="flex items-center gap-1">
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5 hover:bg-emerald-500/10 text-emerald-500 rounded-none"
+                        data-testid="approve-change"
+                      >
+                        <Check className="w-2.5 h-2.5" />
+                      </Button>
+                      <Button
+                        size="icon"
+                        variant="ghost"
+                        className="h-5 w-5 hover:bg-red-500/10 text-red-500 rounded-none"
+                        data-testid="reject-change"
+                      >
+                        <XCircle className="w-2.5 h-2.5" />
+                      </Button>
+                    </div>
+                  )}
+                </div>
+                
+                <div className="p-2 overflow-x-auto">
+                  <div className="font-mono text-[10px] leading-relaxed">
+                    <div className="text-muted-foreground/60 mb-1.5 text-[9px]">
+                      Lines {change.lineStart}-{change.lineEnd} • {change.timestamp}
+                    </div>
+                    
+                    <div className="space-y-0.5">
+                      {change.oldCode.split('\n').map((line, i) => (
+                        <div key={`old-${i}`} className="flex">
+                          <span className="w-5 text-right pr-1.5 text-red-400/50 select-none text-[9px]">{change.lineStart + i}</span>
+                          <span className="px-1 bg-red-500/10 text-red-400 flex-1 truncate">
+                            <Minus className="w-2.5 h-2.5 inline mr-0.5" />
+                            {line}
+                          </span>
+                        </div>
+                      ))}
+                      {change.newCode.split('\n').map((line, i) => (
+                        <div key={`new-${i}`} className="flex">
+                          <span className="w-5 text-right pr-1.5 text-emerald-400/50 select-none text-[9px]">{change.lineStart + change.oldCode.split('\n').length + i}</span>
+                          <span className="px-1 bg-emerald-500/10 text-emerald-400 flex-1 truncate">
+                            <Plus className="w-2.5 h-2.5 inline mr-0.5" />
+                            {line}
+                          </span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
     </div>
   );

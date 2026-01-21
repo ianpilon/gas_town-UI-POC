@@ -4,11 +4,12 @@ import { ProfileCard } from '@/components/ProfileCard';
 import { TerminalChat } from '@/components/TerminalChat';
 import { ActivityFeed } from '@/components/ActivityFeed';
 import { RigFilter } from '@/components/RigFilter';
+import { CodePanel } from '@/components/CodePanel';
 import { generateGraphData, NodeData } from '@/lib/mockData';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
 import { AnimatePresence } from 'framer-motion';
-import { Crosshair, ShieldAlert, Target, Share2, Search, Globe, Terminal } from 'lucide-react';
+import { Crosshair, ShieldAlert, Target, Share2, Search, Globe, Terminal, Code } from 'lucide-react';
 import { VoiceAI } from '@/components/VoiceAI';
 
 // Generate data once (total ~27,500 nodes across all organizations)
@@ -19,6 +20,7 @@ export default function Home() {
   const [filter, setFilter] = useState<'all' | 'exceptional'>('all');
   const [zoomLevel, setZoomLevel] = useState<number>(1);
   const [isTerminalOpen, setIsTerminalOpen] = useState(false);
+  const [isCodePanelOpen, setIsCodePanelOpen] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [focusNodeId, setFocusNodeId] = useState<string | null>(null);
   const [selectedRig, setSelectedRig] = useState<string | null>(null);
@@ -114,6 +116,13 @@ export default function Home() {
         </div>
 
         <div className="pointer-events-auto flex gap-3 relative">
+          <Button 
+            onClick={() => setIsCodePanelOpen(!isCodePanelOpen)}
+            className={`bg-primary/10 hover:bg-primary/20 text-primary border border-primary/20 hover:border-primary/50 font-mono uppercase rounded-none h-10 px-6 backdrop-blur-sm transition-all ${isCodePanelOpen ? 'bg-primary/20 border-primary/50' : ''}`}
+            data-testid="open-code-panel"
+          >
+             <Code className="w-4 h-4 mr-2" /> Code
+          </Button>
           <Button 
             onClick={() => setIsTerminalOpen(!isTerminalOpen)}
             className={`bg-orange-500/10 hover:bg-orange-500/20 text-orange-400 border border-orange-500/20 hover:border-orange-500/50 font-mono uppercase rounded-none h-10 px-6 backdrop-blur-sm transition-all ${isTerminalOpen ? 'bg-orange-500/20 border-orange-500/50' : ''}`}
@@ -221,6 +230,22 @@ export default function Home() {
           }}
         />
       </div>
+
+      {/* Code Panel */}
+      <AnimatePresence>
+        {isCodePanelOpen && (
+          <CodePanel 
+            isOpen={isCodePanelOpen}
+            onClose={() => setIsCodePanelOpen(false)}
+            nodes={graphData.nodes}
+            onNodeSelect={(node) => {
+              setSelectedNode(node);
+              setFocusNodeId(node.id);
+              setTimeout(() => setFocusNodeId(null), 100);
+            }}
+          />
+        )}
+      </AnimatePresence>
 
       {/* Contextual Card Sidebar */}
       <AnimatePresence>
