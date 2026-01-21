@@ -1,7 +1,7 @@
 import { motion } from 'framer-motion';
 import { useState } from 'react';
 import { NodeData } from '@/lib/mockData';
-import { Github, Linkedin, Twitter, Globe, X, Scan, Database, MapPin, Fingerprint, Sparkles, Route, Zap, Users } from 'lucide-react';
+import { Github, Linkedin, Twitter, Globe, X, Scan, Database, MapPin, Fingerprint, Sparkles, Route, Zap, Users, Bot, Cpu, Layers, Terminal } from 'lucide-react';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Separator } from '@/components/ui/separator';
@@ -69,14 +69,16 @@ export function ProfileCard({ node, onClose, graphData, onNodeSelect }: ProfileC
                 <img
                   src={node.img}
                   alt={node.name}
-                  className="w-16 h-16 rounded-full object-cover border border-white/10"
+                  className="w-16 h-16 rounded-full object-cover border border-white/10 bg-[#0d0f12]"
                 />
                 <div className={`absolute -bottom-1 -right-1 w-2 h-2 ${node.exceptional ? 'bg-secondary' : 'bg-emerald-500'} border border-black`} />
              </div>
              <div>
-                <div className="text-[10px] font-mono text-primary/70 mb-1 tracking-widest">ID: {node.id.toUpperCase()}</div>
+                <div className="text-[10px] font-mono text-primary/70 mb-1 tracking-widest flex items-center gap-1">
+                  <Bot className="w-3 h-3" /> AGENT: {node.id.toUpperCase()}
+                </div>
                 <h2 className="text-xl font-bold font-sans uppercase tracking-wide text-foreground" data-testid="text-profile-name">{node.name}</h2>
-                <div className="text-xs font-mono text-muted-foreground">{node.role}</div>
+                <div className="text-xs font-mono text-muted-foreground">{node.role} • {node.company}</div>
              </div>
           </div>
         </div>
@@ -112,7 +114,7 @@ export function ProfileCard({ node, onClose, graphData, onNodeSelect }: ProfileC
         
         {/* Footer */}
         <div className="p-2 border-t border-white/5 bg-[#16181d] text-[10px] font-mono text-center text-muted-foreground/50 flex-shrink-0">
-           // ENCRYPTED CONNECTION ESTABLISHED //
+           // AGENT DATA STREAM ACTIVE //
         </div>
       </div>
     </motion.div>
@@ -139,29 +141,41 @@ function TabButton({ active, onClick, icon, label }: { active: boolean; onClick:
 function OverviewTab({ node, connections, onNodeSelect }: { node: NodeData; connections?: NodeData[]; onNodeSelect?: (node: NodeData) => void }) {
   return (
     <div className="p-6 space-y-6">
-      {/* Key Metrics */}
-      <div className="grid grid-cols-2 gap-4">
+      {/* Agent Specs */}
+      <div className="grid grid-cols-2 gap-3">
          <div className="bg-white/[0.02] p-2 border border-white/5">
-            <div className="text-[10px] text-muted-foreground uppercase font-mono mb-1">Clearance</div>
+            <div className="text-[10px] text-muted-foreground uppercase font-mono mb-1">Parameters</div>
             <div className="text-sm font-bold text-foreground flex items-center gap-2">
-               <Shield /> {node.exceptional ? 'LEVEL 5' : 'LEVEL 1'}
+               <Cpu className="w-3 h-3 text-primary" /> {node.parameters || '70B'}
             </div>
          </div>
          <div className="bg-white/[0.02] p-2 border border-white/5">
-            <div className="text-[10px] text-muted-foreground uppercase font-mono mb-1">Sector</div>
+            <div className="text-[10px] text-muted-foreground uppercase font-mono mb-1">Context</div>
+            <div className="text-sm font-bold text-foreground flex items-center gap-2">
+               <Layers className="w-3 h-3 text-primary" /> {node.contextWindow || '128K'}
+            </div>
+         </div>
+         <div className="bg-white/[0.02] p-2 border border-white/5">
+            <div className="text-[10px] text-muted-foreground uppercase font-mono mb-1">Version</div>
+            <div className="text-sm font-bold text-foreground flex items-center gap-2">
+               <Terminal className="w-3 h-3 text-primary" /> {node.version || 'v4.0'}
+            </div>
+         </div>
+         <div className="bg-white/[0.02] p-2 border border-white/5">
+            <div className="text-[10px] text-muted-foreground uppercase font-mono mb-1">Ecosystem</div>
             <div className="text-sm font-bold text-white flex items-center gap-2">
                <MapPin className="w-3 h-3 text-primary" /> {node.location.split(' ')[0].toUpperCase()}
             </div>
          </div>
       </div>
 
-      {/* Connections */}
+      {/* Connected Agents */}
       {connections && connections.length > 0 && (
         <>
           <Separator className="bg-white/5" />
           <div className="space-y-3">
             <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-              <Users className="w-3 h-3" /> Network ({connections.length})
+              <Users className="w-3 h-3" /> Related Agents ({connections.length})
             </h3>
             <div className="space-y-2 max-h-32 overflow-y-auto">
               {connections.slice(0, 5).map((conn) => (
@@ -171,17 +185,17 @@ function OverviewTab({ node, connections, onNodeSelect }: { node: NodeData; conn
                   className="w-full flex items-center gap-3 p-2 bg-white/[0.02] border border-white/5 hover:border-primary/30 hover:bg-primary/5 transition-colors text-left"
                   data-testid={`connection-${conn.id}`}
                 >
-                  <img src={conn.img} alt={conn.name} className="w-8 h-8 rounded-full object-cover border border-white/10" />
+                  <img src={conn.img} alt={conn.name} className="w-8 h-8 rounded-full object-cover border border-white/10 bg-[#0d0f12]" />
                   <div className="flex-1 min-w-0">
                     <div className="text-xs font-medium text-foreground truncate">{conn.name}</div>
-                    <div className="text-[10px] text-muted-foreground truncate">{conn.role} • {conn.location}</div>
+                    <div className="text-[10px] text-muted-foreground truncate">{conn.role} • {conn.company}</div>
                   </div>
                   {conn.exceptional && <div className="w-2 h-2 bg-secondary flex-shrink-0" />}
                 </button>
               ))}
               {connections.length > 5 && (
                 <div className="text-[10px] text-muted-foreground text-center py-1">
-                  +{connections.length - 5} more connections
+                  +{connections.length - 5} more agents
                 </div>
               )}
             </div>
@@ -191,23 +205,23 @@ function OverviewTab({ node, connections, onNodeSelect }: { node: NodeData; conn
 
       <Separator className="bg-white/5" />
 
-      {/* Performance Index */}
+      {/* Performance Benchmarks */}
       <div className="space-y-4">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-           <Database className="w-3 h-3" /> Performance Index
+           <Database className="w-3 h-3" /> Benchmark Scores
         </h3>
         
         <div className="space-y-3">
-           <TechBar label="Innovation Cap" value={node.psychographic.innovationScore} />
-           <TechBar label="Command Leadership" value={node.psychographic.leadershipPotential} />
-           <TechBar label="Cognitive Flex" value={node.psychographic.openness} />
+           <TechBar label="Reasoning" value={node.psychographic.innovationScore} />
+           <TechBar label="Task Completion" value={node.psychographic.leadershipPotential} />
+           <TechBar label="Instruction Following" value={node.psychographic.openness} />
         </div>
       </div>
 
-       {/* Skills Matrix */}
+       {/* Capabilities */}
        <div className="space-y-3">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-           <Fingerprint className="w-3 h-3" /> Competency Matrix
+           <Fingerprint className="w-3 h-3" /> Capabilities
         </h3>
         <div className="flex flex-wrap gap-1">
           {node.skills.map((skill, i) => (
@@ -220,16 +234,16 @@ function OverviewTab({ node, connections, onNodeSelect }: { node: NodeData; conn
 
       <Separator className="bg-white/5" />
 
-      {/* Comms Channels */}
+      {/* API & Links */}
       <div className="space-y-4">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-           <Scan className="w-3 h-3" /> Secure Comms
+           <Scan className="w-3 h-3" /> Resources
         </h3>
         <div className="grid grid-cols-2 gap-2">
-           <SocialBtn icon={Github} label="Repo" href={`https://${node.social.github}`} />
-           <SocialBtn icon={Linkedin} label="Net" href={`https://${node.social.linkedin}`} />
-           <SocialBtn icon={Twitter} label="Feed" href={`https://${node.social.twitter}`} />
-           <SocialBtn icon={Globe} label="Link" href={`https://${node.social.website}`} />
+           <SocialBtn icon={Github} label="Source" href={`https://${node.social.github}`} />
+           <SocialBtn icon={Linkedin} label="Company" href={`https://${node.social.linkedin}`} />
+           <SocialBtn icon={Twitter} label="Updates" href={`https://${node.social.twitter}`} />
+           <SocialBtn icon={Globe} label="Docs" href={`https://${node.social.website}`} />
         </div>
       </div>
     </div>
@@ -238,20 +252,21 @@ function OverviewTab({ node, connections, onNodeSelect }: { node: NodeData; conn
 
 function JourneyTab({ node }: { node: NodeData }) {
   const categoryColors: Record<string, string> = {
-    founder: 'text-amber-400 border-amber-400/30',
-    leadership: 'text-blue-400 border-blue-400/30',
     research: 'text-purple-400 border-purple-400/30',
     engineering: 'text-emerald-400 border-emerald-400/30',
-    innovation: 'text-primary border-primary/30',
-    thought_leader: 'text-rose-400 border-rose-400/30',
+    launch: 'text-amber-400 border-amber-400/30',
+    improvement: 'text-blue-400 border-blue-400/30',
+    architecture: 'text-primary border-primary/30',
+    feature: 'text-cyan-400 border-cyan-400/30',
+    breakthrough: 'text-rose-400 border-rose-400/30',
   };
 
   return (
     <div className="p-6 space-y-6">
-      {/* Synthesis Narrative */}
+      {/* Agent Overview */}
       <div className="space-y-3">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-           <Sparkles className="w-3 h-3" /> Synthesis
+           <Sparkles className="w-3 h-3" /> Overview
         </h3>
         <div className="bg-white/[0.02] border border-white/5 p-4">
           <p className="text-sm text-foreground/80 leading-relaxed italic">
@@ -262,10 +277,10 @@ function JourneyTab({ node }: { node: NodeData }) {
 
       <Separator className="bg-white/5" />
 
-      {/* Timeline */}
+      {/* Version History */}
       <div className="space-y-3">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-           <Route className="w-3 h-3" /> Career Timeline
+           <Route className="w-3 h-3" /> Version History
         </h3>
         <div className="relative">
           {/* Vertical line */}
@@ -275,7 +290,7 @@ function JourneyTab({ node }: { node: NodeData }) {
             {node.journey.milestones.map((milestone, i) => (
               <div key={i} className="flex gap-4 items-start" data-testid={`milestone-${i}`}>
                 <div className="w-16 text-right">
-                  <span className="text-xs font-mono text-primary font-bold">{milestone.year}</span>
+                  <span className="text-xs font-mono text-primary font-bold">{(milestone as any).version || `v${i + 1}.0`}</span>
                 </div>
                 <div className="relative">
                   <div className={`w-2 h-2 border ${categoryColors[milestone.category] || 'border-white/30'} bg-[#1a1c23] z-10 relative`} />
@@ -301,13 +316,13 @@ function JourneyTab({ node }: { node: NodeData }) {
 function SignalsTab({ node }: { node: NodeData }) {
   return (
     <div className="p-6 space-y-6">
-      {/* What Makes Them Exceptional */}
+      {/* What Makes This Agent Special */}
       <div className="space-y-3">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
            <Zap className="w-3 h-3" /> Differentiators
         </h3>
         <p className="text-[10px] text-muted-foreground/70 font-mono">
-          Non-ordinary attributes that distinguish this candidate from typical profiles
+          Key attributes that distinguish this agent from competitors
         </p>
         <div className="space-y-2">
           {node.journey.exceptionalTraits.map((trait, i) => (
@@ -327,31 +342,31 @@ function SignalsTab({ node }: { node: NodeData }) {
 
       <Separator className="bg-white/5" />
 
-      {/* Quick Assessment */}
+      {/* Performance Signals */}
       <div className="space-y-3">
         <h3 className="text-xs font-bold font-mono text-muted-foreground uppercase tracking-widest flex items-center gap-2">
-           <Database className="w-3 h-3" /> Signal Strength
+           <Database className="w-3 h-3" /> Performance Signals
         </h3>
         
         <div className="grid grid-cols-2 gap-3">
           <SignalCard 
-            label="First Mover" 
-            value={node.exceptional ? 'HIGH' : 'LOW'} 
+            label="SOTA Status" 
+            value={node.exceptional ? 'YES' : 'NO'} 
             active={node.exceptional}
           />
           <SignalCard 
-            label="Scale Builder" 
+            label="Reliability" 
             value={node.psychographic.leadershipPotential > 70 ? 'HIGH' : 'MED'} 
             active={node.psychographic.leadershipPotential > 70}
           />
           <SignalCard 
-            label="Innovation" 
+            label="Reasoning" 
             value={node.psychographic.innovationScore > 85 ? 'HIGH' : 'MED'} 
             active={node.psychographic.innovationScore > 85}
           />
           <SignalCard 
-            label="Risk Profile" 
-            value={node.psychographic.openness > 80 ? 'BOLD' : 'STD'} 
+            label="Versatility" 
+            value={node.psychographic.openness > 80 ? 'HIGH' : 'STD'} 
             active={node.psychographic.openness > 80}
           />
         </div>
@@ -363,10 +378,10 @@ function SignalsTab({ node }: { node: NodeData }) {
           <div className="bg-secondary/10 border border-secondary/20 p-4">
             <div className="flex items-center gap-2 mb-2">
               <Sparkles className="w-4 h-4 text-secondary" />
-              <span className="text-xs font-mono text-secondary uppercase tracking-wider font-bold">High-Value Target</span>
+              <span className="text-xs font-mono text-secondary uppercase tracking-wider font-bold">Top-Tier Agent</span>
             </div>
             <p className="text-[11px] text-foreground/70 leading-relaxed">
-              This candidate exhibits multiple non-ordinary signals across innovation, leadership, and execution domains. Recommend priority engagement protocol.
+              This AI agent demonstrates state-of-the-art performance across multiple benchmarks. Recommended for complex, mission-critical applications.
             </p>
           </div>
         </>
