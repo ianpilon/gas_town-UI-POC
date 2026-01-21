@@ -1,4 +1,4 @@
-# Gas Town - Multi-Agent Orchestration System
+# Gas Town - Multi-Agent Orchestration UI proof of concept
 
 ## Demo
 
